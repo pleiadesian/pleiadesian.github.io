@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"pleiadesian.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="在硬盘上组建 RAID 是一个较为通用的技术。近年来由于存储性能的提升和新的存储技术的提出，有一系列学术界工作针对 RAID 新架构进行了研究。本文先简单介绍 RAID 的基本概念，然后分享一些学术界近年来针对 RAID 的科研工作。 RAID 背景RAID 的产生背景在 HDD 被广泛用于存储的时代，由于硬件本身的限制，硬盘随机读写效率低下，硬盘损坏可能导致数据丢失。因此，将多块 HDD 组成">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RAID 的应用和研究">
+<meta property="og:url" content="https://pleiadesian.github.io/project/2021/08/06/RAID-%E7%9A%84%E5%BA%94%E7%94%A8%E5%92%8C%E7%A0%94%E7%A9%B6/index.html">
+<meta property="og:site_name" content="pleiadesian&#39;s blog">
+<meta property="og:description" content="在硬盘上组建 RAID 是一个较为通用的技术。近年来由于存储性能的提升和新的存储技术的提出，有一系列学术界工作针对 RAID 新架构进行了研究。本文先简单介绍 RAID 的基本概念，然后分享一些学术界近年来针对 RAID 的科研工作。 RAID 背景RAID 的产生背景在 HDD 被广泛用于存储的时代，由于硬件本身的限制，硬盘随机读写效率低下，硬盘损坏可能导致数据丢失。因此，将多块 HDD 组成">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://pleiadesian.github.io/project/2021/08/06/RAID-%E7%9A%84%E5%BA%94%E7%94%A8%E5%92%8C%E7%A0%94%E7%A9%B6/images/raid0.png">
+<meta property="og:image" content="https://pleiadesian.github.io/project/2021/08/06/RAID-%E7%9A%84%E5%BA%94%E7%94%A8%E5%92%8C%E7%A0%94%E7%A9%B6/images/raid1.png">
+<meta property="og:image" content="https://pleiadesian.github.io/project/2021/08/06/RAID-%E7%9A%84%E5%BA%94%E7%94%A8%E5%92%8C%E7%A0%94%E7%A9%B6/images/raid5.png">
+<meta property="og:image" content="https://pleiadesian.github.io/project/2021/08/06/RAID-%E7%9A%84%E5%BA%94%E7%94%A8%E5%92%8C%E7%A0%94%E7%A9%B6/images/jbod.png">
+<meta property="og:image" content="https://pleiadesian.github.io/project/2021/08/06/RAID-%E7%9A%84%E5%BA%94%E7%94%A8%E5%92%8C%E7%A0%94%E7%A9%B6/images/raid10.png">
+<meta property="og:image" content="https://pleiadesian.github.io/project/2021/08/06/RAID-%E7%9A%84%E5%BA%94%E7%94%A8%E5%92%8C%E7%A0%94%E7%A9%B6/images/fusionraid.png">
+<meta property="article:published_time" content="2021-08-06T04:07:02.000Z">
+<meta property="article:modified_time" content="2021-08-06T06:35:07.077Z">
+<meta property="article:author" content="pleiadesian">
+<meta property="article:tag" content="storage">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://pleiadesian.github.io/project/2021/08/06/RAID-%E7%9A%84%E5%BA%94%E7%94%A8%E5%92%8C%E7%A0%94%E7%A9%B6/images/raid0.png">
+
+<link rel="canonical" href="https://pleiadesian.github.io/project/2021/08/06/RAID-%E7%9A%84%E5%BA%94%E7%94%A8%E5%92%8C%E7%A0%94%E7%A9%B6/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>RAID 的应用和研究 | pleiadesian's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="pleiadesian's blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">pleiadesian's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://pleiadesian.github.io/project/2021/08/06/RAID-%E7%9A%84%E5%BA%94%E7%94%A8%E5%92%8C%E7%A0%94%E7%A9%B6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="pleiadesian">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="pleiadesian's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          RAID 的应用和研究
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2021-08-06 12:07:02 / Modified: 14:35:07" itemprop="dateCreated datePublished" datetime="2021-08-06T12:07:02+08:00">2021-08-06</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在硬盘上组建 RAID 是一个较为通用的技术。近年来由于存储性能的提升和新的存储技术的提出，有一系列学术界工作针对 RAID 新架构进行了研究。本文先简单介绍 RAID 的基本概念，然后分享一些学术界近年来针对 RAID 的科研工作。</p>
+<h2 id="RAID-背景"><a href="#RAID-背景" class="headerlink" title="RAID 背景"></a>RAID 背景</h2><h3 id="RAID-的产生背景"><a href="#RAID-的产生背景" class="headerlink" title="RAID 的产生背景"></a>RAID 的产生背景</h3><p>在 HDD 被广泛用于存储的时代，由于硬件本身的限制，硬盘随机读写效率低下，硬盘损坏可能导致数据丢失。因此，将多块 HDD 组成 HDD 阵列，并在阵列之上设计读写分发策略和容错机制成为了提高存储读写效率和数据容错率的一种常用做法。这就是至今仍在被广泛使用的 RAID（Redundant Array of Independent Disks，独立硬盘冗余阵列）技术。<br>近年来，随着 SSD 的出现和普及，为了提高 SSD 容错率以及减少 SSD 中垃圾回收等内部活动对读写性能带来的影响，在 SSD 之上使用的 RAID 技术，又称 AFA（All-Flash Array），被工业界所广泛采用。</p>
+<h3 id="普通-RAID"><a href="#普通-RAID" class="headerlink" title="普通 RAID"></a>普通 RAID</h3><p>下面介绍三种标准 RAID ：RAID 0、RAID 1、RAID 5</p>
+<h4 id="RAID-0"><a href="#RAID-0" class="headerlink" title="RAID 0"></a>RAID 0</h4><p>如下图所示，多块硬盘组成 RAID 0，数据以条带化（stripe）的方式被分到多块盘上。条带指的是多个盘用于存储同一段连续数据的区域，例如下图中的 A1 与 A2 组成了一块条带。这种设计可以在读写数据时同时利用多块盘的带宽。但 RAID 0 存在单盘损坏就无法恢复数据的问题，不提供容错和数据冗余。<br><img src="images/raid0.png"></p>
+<h4 id="RAID-1"><a href="#RAID-1" class="headerlink" title="RAID 1"></a>RAID 1</h4><p>如下图所示，多块硬盘组成 RAID 1，同一份数据被复制成两份分别存在两块盘上。这种设计的好处是，当单块盘发生损坏，可以通过读取另一块盘中同一个条带上的数据进行恢复。同时，读取数据可以利用所有硬盘的读带宽，具有较好的读性能。理论上，假设使用 n 块盘组成 RAID 1，最多能够容忍 (n-1) 块盘的损坏，因此 RAID 1 是容错性最好的一种 RAID。<br><img src="images/raid1.png"></p>
+<h4 id="RAID-5"><a href="#RAID-5" class="headerlink" title="RAID 5"></a>RAID 5</h4><p>RAID 5 兼顾读写性能、数据安全和存储成本。RAID 5 当中的数据被条带化的存储，类似于 RAID 0。在每一个条带上引入一个 parity block （奇偶校验块），存储校验信息。在写入数据块时需要同时更新对应的 parity。在发生硬盘损坏时，RAID 5 可以通过读取未损坏的盘和 parity 的信息完成数据的恢复。<br>相比于 RAID 0，RAID 5 具有更好的容错性；相比于 RAID 1，RAID 5 无需写多块相同数据，只需更新目标数据块和 parity 块，具有较好的写性能；同时 RAID 5 在每一个条带上只会利用 1 个块作为冗余的校验信息存储，相比于 RAID 1 来说保证相当的容错性的同时又节省了更多的存储空间。<br><img src="images/raid5.png"></p>
+<h3 id="另类-RAID"><a href="#另类-RAID" class="headerlink" title="另类 RAID"></a>另类 RAID</h3><h4 id="JBOD"><a href="#JBOD" class="headerlink" title="JBOD"></a>JBOD</h4><p>JBOD（Just a Bunch Of Disks）简单地将多个硬盘组合进行使用，不使用数据条带化。相比于 RAID 0，读写连续的数据大多落在同一块盘上，无法利用多硬盘的带宽优势。<br><img src="images/jbod.png"></p>
+<h4 id="RAID-10"><a href="#RAID-10" class="headerlink" title="RAID 10"></a>RAID 10</h4><p>RAID 10 在多个 RAID 1 组之上组成 RAID 0。数据先进行条带化，再进行镜像，这使其能够获得 RAID 0 带来的读写性能优势以及 RAID 1 带来的容错性。<br>与之相对的，存在 RAID 01 的架构，即先对数据进行镜像，再进行条带化。然而，RAID 01 底层的一组 RAID 0 中只要有一块盘损坏，整个组将无法对外服务，这使得 RAID 01 可用性要比 RAID 10 差。因此一般零售主板只支持 RAID 10 而不支持 RAID 01。<br><img src="images/raid10.png"></p>
+<h3 id="部署方法"><a href="#部署方法" class="headerlink" title="部署方法"></a>部署方法</h3><p>Linux 的 mdadm 实用工具提供了软件 RAID 的实现。Linux 中实现了 md[1]（multiple devices，多设备）驱动器，用于在软件层面完成 RAID 的功能，例如对数据进行镜像或计算 parity。由于这类软件 RAID 需要占用一些 CPU 资源来完成 RAID 架构所需要的计算任务，实际的读写性能会受到一定影响。<br>一类 RAID 架构的出现通常先有软件实现，而当硬件厂商发现这类 RAID 被广泛使用时，就会在硬件上设计出更高效的实现。硬件 RAID 相比于软件 RAID 更加节省 CPU 资源并且能够完成更高效的数据读写和保护。<br>然而在实际使用上，并非硬件实现能够完胜软件实现。使用软件 RAID 反而会有更好的兼容性，容易监控磁盘状态以及更容易将硬盘迁移到不同的机器上。可以参考 lwn 对软硬件 RAID 实现的讨论[2]。</p>
+<h2 id="RAID-前沿研究"><a href="#RAID-前沿研究" class="headerlink" title="RAID 前沿研究"></a>RAID 前沿研究</h2><h3 id="异构-RAID"><a href="#异构-RAID" class="headerlink" title="异构 RAID"></a>异构 RAID</h3><p>在相同的存储介质上组成 RAID 从而提高读写效率或是数据可靠性已经是一个被广泛使用的技术。而在存储相关的学术研究当中，有许多工作将 HDD、SSD 甚至是 NVM 等不同存储介质组合成为 RAID 从而获得更多性能或者容错性的优势。下面将对这些研究做一些设计思想上的介绍。</p>
+<h4 id="数据缓存架构"><a href="#数据缓存架构" class="headerlink" title="数据缓存架构"></a>数据缓存架构</h4><p>价格不同、读写效率不同的多种存储介质通常可以靠 caching（缓存） 或者 tiering（分层）等设计来完成更高效的存储[3]。<br>在 caching 的设计当中，小容量的快存储作为大容量慢存储的缓存层，以此来提高热数据的访问效率。例如，小块 SSD 可以作为大容量 HDD 的缓存，这相比于相同容量的单层快存储，节省了购买资金的开销；相比于单层慢存储，又获得了更好的读写性能。Linux 中软件实现的 EnhanceIO[4]、Bcache[5]、dm-cache[6] 与 Flashcache[7]，以及硬件实现的 HPE SmartCache[8] 都采用了这种架构，使用小块 SSD 作为 HDD 的缓存，提高性能。使用 mdadm 工具也可以简单的配置这种缓存架构。然而，当缓存抖动现象（即由于快存储容量不足而导致的频繁的数据换入换出）严重时，两层存储之间交换的负载会增加，从而影响到存储的整体性能表现。<br>在 tiering 的设计当中，各层的存储都可以被上层请求直接访问，在后台异步进行冷热数据的迁移。由于其数据重新布局的频率相比于 caching 低很多，整体的数据布局可能相对处于较差的状态，对于频繁访问热点数据的工作负载不太友好。发表在 ISPA ‘12 的 PASS[9] 论文基于这种思路，提出 SSD 同步提供 IO 服务，数据异步镜像到 HDD 的架构，从而掩盖掉直接读写 HDD 的时延，并能利用 HDD 的大容量优势。<br>实际部署异构存储设备通常需要根据工作负载以及硬件开销等需求在上述两种常见的架构中进行权衡和选型。同时，考虑到 SSD 作为频繁读写的缓存可能会很快写坏，Linux 中各个磁盘缓存机制也支持将多个小块的 SSD 缓存组成 RAID 1，从而避免 SSD 频繁读写导致写坏和数据丢失的问题。但这只能算是暂缓之计，SSD 当中垃圾回收等内部活动所带来的性能下降需要更完善的架构设计才能够解决。因此，最近几年不少学术界工作针对混用 SSD 和 HDD 可能会导致一系列的性能下降问题，做了相应的架构设计进行解决。<br>在 FAST ‘12 的一篇论文中，Oh 等人[10]提出在 SSD 作为 HDD 的缓存的架构下，不能简单的将整块 SSD 盘作为可读写的缓存，否则可能导致预留给 SSD 做垃圾回收的空间不够，在垃圾回收实际进行时导致严重的性能下降。因此这篇论文将 SSD 拆为读、写以及内存回收三块区域，并构建模型得出最佳的分配方式，减少 SSD 内部活动给其作为缓存的性能带来的影响。<br>发表在 FAST ‘20 的 BCW[11] 也指出系统对 SSD 和 HDD 的利用上存在明显的不均衡现象，SSD 经常被过度使用而 HDD 的利用率却相对较低。例如，在 caching 的架构下，写密集的工作负载都落在 SSD 上，导致垃圾回收被频繁出发，增加尾时延；同时会导致 SSD 更容易被写穿，影响使用寿命；在 SSD 承受高负载的情况下，HDD 的写带宽却只有较低的利用率。为了解决该问题，BCW 这篇论文提出一个发现：HDD 内部的缓冲机制使得其写操作的延时呈周期变化，在写操作落在 HDD 缓冲时，延时只有微秒级别，这和写 SSD 的延时非常接近。因此在 BCW 设计中，一部分写操作被引导到 HDD 上，从而降低 SSD 的负载。BCW 所实现的 I/O 控制器会根据其建立好的模型先预测 HDD 下一次写入的情况，在它能够提供微秒级延时时，将请求交由 HDD 进行处理。</p>
+<h4 id="元数据缓存架构"><a href="#元数据缓存架构" class="headerlink" title="元数据缓存架构"></a>元数据缓存架构</h4><p>在基于 parity 保证数据可靠性的 RAID 架构当中，小块、频繁的数据写入会导致 parity 也被频繁读取、计算、写入 （read-compute-write process，读取-计算-写入过程）。这会导致每次写入数据时额外的读 parity、计算 parity 的操作使得写入的时延增加。<br>1993年 ISCA 会议的一篇文章 Parity Logging Overcoming the Small Write Problem in Redundant Disk Arrays[12] 提出 parity 应该以 logging 的方式追加写入到 HDD 上，而后再批量更新到实际的 parity 块中，这样就能利用 HDD 的顺序写较好的性能减轻 parity 频繁更新的问题。<br>发表在 ICPP ‘16 的文章 Improving RAID performance using an endurable SSD cache[13] 提出使用 SSD 作为数据和 parity 的缓存，从而将重复使用到的 parity 留在缓存中，减少了对底层 HDD 的写入频率。<br>Purity[14], Flash-Aware RAID[15] 两篇文章使用读写性能更好的 NVRAM 来作为数据和 parity 的缓存，从而达到更好的性能。</p>
+<h3 id="AFA"><a href="#AFA" class="headerlink" title="AFA"></a>AFA</h3><p>RAID 的初衷是用于提高 HDD 的读写性能和容错性。在本文一开始所提到的 AFA（All-Flash Array）直接将原来用于 HDD 的 RAID 技术直接迁移到 SSD 阵列上使用，这导致 SSD 本身的一些特性使得 RAID 的优势受到限制。例如，如果使用的是 AFA，那么上述 parity 的读取-计算-写入过程同时还会导致写放大问题，即对 parity 块的频繁写入会提高 SSD 做垃圾回收的频率以及降低 SSD 盘的寿命。<br>针对此问题，Differential RAID [16] 对 SSD 盘的寿命进行建模，根据估计的 SSD 剩余寿命将 parity 进行在各个 SSD 上进行重分布，从而达到负载均衡的效果，避免 parity 的频繁更新导致单个盘迅速写坏。<br>FAST ‘16 会议中的 ToleRAID [17] 发现 SSD 垃圾回收等内部活动在单个 SSD 上所表现出来的尾时延会在 AFA 的架构下被进一步放大。ToleRAID 针对尾时延问题进行了解决，其中一个核心的避免尾时延的机制是，在读取一块数据的同时发出一个额外的对 parity 块的读取请求，并通过 parity 重构出当前要读的这块数据，使用额外的读请求数和计算开销对冲掉了原本单个读取数据拉高尾时延的风险。<br>发表在今年 FAST 会议上的 FusionRAID [18] 由清华大学的郑纬民团队完成，个人认为是目前 RAID 前沿设计的集大成者。通过混合有效的 RAID 架构，提高了 AFA 的性能，减轻了 SSD 本身垃圾回收、易写坏等问题带来的整体性能影响。其整体架构如下图所示，FusionRAID 在实际的 SSD 池之上引入了一个逻辑区域，利用逻辑区域到物理设备的映射的设计，使得请求被均衡的发到所有 SSD 上，从而避免了单个 SSD 盘的内部活动对整个阵列带来的尾时延问题。FusionRAID 将写入请求分为两个阶段完成：先写入 RAID1 区域（图中 replicated area），再后台转换为 RAID5/6 （图中 RAID area）。前者避免了 parity 频繁更新的问题，后者又减少了数据冗余并提高了空间利用率。这里有个小优化是 RAID1 区域的结构可以是已经为到 RAID5/6 的转换所准备好的，在需要转换时无需做全量的数据拷贝，在原地完成转换。优化实现细节详见论文。此外，FusionRAID 还引入了尾时延检查和请求重定向的优化，在 SSD 盘不可相应的时候将请求转发到其他盘上，从而避免最坏情况下的尾时延显著放大问题。<br><img src="images/fusionraid.png"></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>RAID 是将多个存储设备进行组合从而提高存储整体的读写效率和数据可靠性的一种常用技术。在工业界 AFA 被广泛的使用，异构设备之上的 RAID 设计也成为了学术研究的一个热门领域。RAID 和大多数分布式系统的本质目的一样，通过组合数量较多硬件资源而提高整体性能和可靠性。因此基于 RAID 的架构设计常常和分布式系统当中的一些设计类似。</p>
+<h2 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h2><p>[1] <a target="_blank" rel="noopener" href="https://linux.die.net/man/8/mdadm">https://linux.die.net/man/8/mdadm</a><br>[2] Linux Software RAID &gt; Hardware RAID, <a target="_blank" rel="noopener" href="https://lwn.net/Articles/666226/">https://lwn.net/Articles/666226/</a><br>[3] Hybrid storage systems: A survey of architectures and algorithms, <a target="_blank" rel="noopener" href="https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=8283744">https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=8283744</a><br>[4] EnhanceIO, <a target="_blank" rel="noopener" href="https://github.com/stec-inc/EnhanceIO">https://github.com/stec-inc/EnhanceIO</a><br>[5] bcache, <a target="_blank" rel="noopener" href="https://www.kernel.org/doc/Documentation/bcache.txt">https://www.kernel.org/doc/Documentation/bcache.txt</a><br>[6] dm-cache, <a target="_blank" rel="noopener" href="https://www.kernel.org/doc/Documentation/device-mapper/cache.txt">https://www.kernel.org/doc/Documentation/device-mapper/cache.txt</a><br>[7] Flashcache, <a target="_blank" rel="noopener" href="https://github.com/facebookarchive/flashcache">https://github.com/facebookarchive/flashcache</a><br>[8] HPE SmartCache, <a target="_blank" rel="noopener" href="https://buy.hpe.com/us/en/software/server-management-software/server-management-software/smart-array-management-software/hpe-smart-array-sr-smartcache/p/5364342">https://buy.hpe.com/us/en/software/server-management-software/server-management-software/smart-array-management-software/hpe-smart-array-sr-smartcache/p/5364342</a><br>[9] PASS: A Hybrid Storage System for Performance-Synchronization Tradeoffs Using SSDs (ISPA ‘12)<br>[10] Caching less for better performance: Balancing cache size and update cost of flash memory cache in hybrid storage systems (FAST ‘12)<br>[11] BCW: Buffer-Controlled Writes to HDDs for SSD-HDD Hybrid Storage Server (FAST ‘20)<br>[12] Parity Logging Overcoming the Small Write Problem in Redundant Disk Arrays (ISCA ‘93)<br>[13] Improving RAID performance using an endurable SSD cache (ICPP ‘16)<br>[14] Purity: Building Fast, Highly-Available Enterprise Flash Storage from Commodity Components (SIGMOD ‘15)<br>[15] Flash-aware RAID techniques for dependable and high-performance flash memory SSD (TC ‘11)<br>[16] Differential RAID: Rethinking RAID for SSD reliability (TOS ‘10)<br>[17] The Tail at Store: A Revelation from Millions of Hours of Disk and SSD Deployments (FAST ‘16)<br>[18] FusionRAID: Achieving Consistent Low Latency for Commodity SSD Arrays (FAST ‘21)</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/storage/" rel="tag"># storage</a>
+          </div>
+
+        
+
+
+        
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#RAID-%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">RAID 背景</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#RAID-%E7%9A%84%E4%BA%A7%E7%94%9F%E8%83%8C%E6%99%AF"><span class="nav-number">1.1.</span> <span class="nav-text">RAID 的产生背景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%99%AE%E9%80%9A-RAID"><span class="nav-number">1.2.</span> <span class="nav-text">普通 RAID</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#RAID-0"><span class="nav-number">1.2.1.</span> <span class="nav-text">RAID 0</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#RAID-1"><span class="nav-number">1.2.2.</span> <span class="nav-text">RAID 1</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#RAID-5"><span class="nav-number">1.2.3.</span> <span class="nav-text">RAID 5</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%A6%E7%B1%BB-RAID"><span class="nav-number">1.3.</span> <span class="nav-text">另类 RAID</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#JBOD"><span class="nav-number">1.3.1.</span> <span class="nav-text">JBOD</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#RAID-10"><span class="nav-number">1.3.2.</span> <span class="nav-text">RAID 10</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%83%A8%E7%BD%B2%E6%96%B9%E6%B3%95"><span class="nav-number">1.4.</span> <span class="nav-text">部署方法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RAID-%E5%89%8D%E6%B2%BF%E7%A0%94%E7%A9%B6"><span class="nav-number">2.</span> <span class="nav-text">RAID 前沿研究</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%82%E6%9E%84-RAID"><span class="nav-number">2.1.</span> <span class="nav-text">异构 RAID</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E7%BC%93%E5%AD%98%E6%9E%B6%E6%9E%84"><span class="nav-number">2.1.1.</span> <span class="nav-text">数据缓存架构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%83%E6%95%B0%E6%8D%AE%E7%BC%93%E5%AD%98%E6%9E%B6%E6%9E%84"><span class="nav-number">2.1.2.</span> <span class="nav-text">元数据缓存架构</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AFA"><span class="nav-number">2.2.</span> <span class="nav-text">AFA</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E9%93%BE%E6%8E%A5"><span class="nav-number">4.</span> <span class="nav-text">参考链接</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="pleiadesian"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">pleiadesian</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">1</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/pleiadesian" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;pleiadesian" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:zl31wang@gmail.com" title="E-Mail → mailto:zl31wang@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/pleiadesian1" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;pleiadesian1" rel="noopener" target="_blank"><i class="fab fa-twitter fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/atom.xml" title="RSS → &#x2F;atom.xml"><i class="fa fa-rss fa-fw"></i></a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">pleiadesian</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
