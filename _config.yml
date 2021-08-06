@@ -14,7 +14,7 @@ timezone: ''
 # URL
 ## Set your site url here. For example, if you use GitHub Page, set url as 'https://username.github.io/project'
 url: https://pleiadesian.github.io/project
-root: /project
+root: /
 permalink: :year/:month/:day/:title/
 permalink_defaults:
 pretty_urls:
@@ -105,7 +105,7 @@ theme: next
 deploy:
   type: git
   repo: git@github.com:pleiadesian/pleiadesian.github.io.git
-  branch: main
+  branch: master
 
 # RSS
 # https://github.com/hexojs/hexo-generator-feed
