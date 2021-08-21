@@ -6,7 +6,7 @@
   <link href="https://pleiadesian.github.io/project/atom.xml" rel="self"/>
   
   <link href="https://pleiadesian.github.io/project/"/>
-  <updated>2021-08-06T07:41:59.223Z</updated>
+  <updated>2021-08-21T08:19:20.802Z</updated>
   <id>https://pleiadesian.github.io/project/</id>
   
   <author>
@@ -15,6 +15,33 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>GSoC 2021 project: Using BALANCED_READS on RGW Calls to RADOS</title>
+    <link href="https://pleiadesian.github.io/project/2021/08/21/GSoC-2021-project-Using-BALANCED-READS-on-RGW-Calls-to-RADOS/"/>
+    <id>https://pleiadesian.github.io/project/2021/08/21/GSoC-2021-project-Using-BALANCED-READS-on-RGW-Calls-to-RADOS/</id>
+    <published>2021-08-21T07:51:50.000Z</published>
+    <updated>2021-08-21T08:19:20.802Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h2 id=&quot;Overview&quot;&gt;&lt;a href=&quot;#Overview&quot; class=&quot;headerlink&quot; title=&quot;Overview&quot;&gt;&lt;/a&gt;Overview&lt;/h2&gt;&lt;p&gt;I contributed 5 pull requests to Ceph Object</summary>
+        
+      
+    
+    
+    
+    
+    <category term="file system" scheme="https://pleiadesian.github.io/project/tags/file-system/"/>
+    
+    <category term="distributed system" scheme="https://pleiadesian.github.io/project/tags/distributed-system/"/>
+    
+    <category term="intern" scheme="https://pleiadesian.github.io/project/tags/intern/"/>
+    
+  </entry>
   
   <entry>
     <title>RAID 的应用和研究</title>
