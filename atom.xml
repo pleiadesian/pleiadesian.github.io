@@ -6,7 +6,7 @@
   <link href="https://pleiadesian.github.io/project/atom.xml" rel="self"/>
   
   <link href="https://pleiadesian.github.io/project/"/>
-  <updated>2021-08-21T08:19:20.802Z</updated>
+  <updated>2021-08-21T08:24:12.207Z</updated>
   <id>https://pleiadesian.github.io/project/</id>
   
   <author>
@@ -21,16 +21,10 @@
     <link href="https://pleiadesian.github.io/project/2021/08/21/GSoC-2021-project-Using-BALANCED-READS-on-RGW-Calls-to-RADOS/"/>
     <id>https://pleiadesian.github.io/project/2021/08/21/GSoC-2021-project-Using-BALANCED-READS-on-RGW-Calls-to-RADOS/</id>
     <published>2021-08-21T07:51:50.000Z</published>
-    <updated>2021-08-21T08:19:20.802Z</updated>
+    <updated>2021-08-21T08:24:12.207Z</updated>
     
     
-      
-      
-        
-        
-    <summary type="html">&lt;h2 id=&quot;Overview&quot;&gt;&lt;a href=&quot;#Overview&quot; class=&quot;headerlink&quot; title=&quot;Overview&quot;&gt;&lt;/a&gt;Overview&lt;/h2&gt;&lt;p&gt;I contributed 5 pull requests to Ceph Object</summary>
-        
-      
+    <summary type="html">&lt;h2 id=&quot;Overview&quot;&gt;&lt;a href=&quot;#Overview&quot; class=&quot;headerlink&quot; title=&quot;Overview&quot;&gt;&lt;/a&gt;Overview&lt;/h2&gt;&lt;p&gt;I contributed 5 pull requests to Ceph Object Gateway (radosgw). Among the 5 PRs, 2 is merged, 2 is closed and 1 is waiting to be reviewed.&lt;/p&gt;</summary>
     
     
     
