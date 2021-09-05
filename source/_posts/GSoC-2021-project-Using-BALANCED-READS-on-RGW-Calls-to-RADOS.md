@@ -9,7 +9,7 @@ tags:
 
 ## Overview
 
-I contributed 5 pull requests to Ceph Object Gateway (radosgw). Among the 5 PRs, 2 is merged, 2 is closed and 1 is waiting to be reviewed.
+I contributed 5 pull requests to Ceph Object Gateway (radosgw). Among the 5 PRs, 3 is merged and 2 is closed.
 <!--more-->
 
 ## Details
@@ -20,7 +20,7 @@ Here are the PRs I added during the GSoC:
 2. Require bucket name in bucket chown ([#41668](https://github.com/ceph/ceph/pull/41668), merged)
 3. Add enable_keep_alive option ([#41824](https://github.com/ceph/ceph/pull/41824), closed)
 4. Add balanced read option ([#42409](https://github.com/ceph/ceph/pull/42409), closed)
-5. Add Lua script examples for Elasticsearch and Prometheus ([#42875](https://github.com/ceph/ceph/pull/42875), to be reviewed)
+5. Add Lua script examples for Elasticsearch and Prometheus ([#42875](https://github.com/ceph/ceph/pull/42875), merged)
 
 ## Conclusion
 
